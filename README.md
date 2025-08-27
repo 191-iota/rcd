@@ -6,13 +6,11 @@ With multithreading enabled via `WalkBuilder`, performance has **significantly i
 For example, with a default scan depth of 5 and matching at depth 3:  
 
 - **Before:** 107 ms (single-threaded) 
-- **After:** 8 ms (multi-threaded) 
+- **After:** 8 ms (multi-threaded)
 
 | Before | After |
 |--------|-------|
 | ![Before](assets/perf_before.png) | ![After](assets/perf_after.png) |
-
-Test the speed of it yourself to get a full grasp.
 
 note: Tests were run on a Ryzen 9 3900X.
 
