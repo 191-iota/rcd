@@ -1,19 +1,29 @@
 # rcd
-Straight to the point: Matches one or multiple paths and `cd`s into it.
+`rcd` matches one or more paths and `cd`s into the first match.
 
-## Prerequisites
-```bash
-curl -fsSL https://sh.rustup.rs | sh
-source "$HOME/.cargo/env"
-```
+## Performance
+With multithreading enabled via `WalkBuilder`, performance has **significantly increased**.  
+For example, with a default scan depth of 5 and matching at depth 3:  
+
+- **Before:** 107 ms (single-threaded) 
+- **After:** 8 ms (multi-threaded) 
+
+| Before | After |
+|--------|-------|
+| ![Before](assets/perf_before.png) | ![After](assets/perf_after.png) |
+
+Test the speed of it yourself to get a full grasp.
+
+note: Tests were run on a Ryzen 9 3900X.
 
 ## Install
-From source:
 ```bash
 cargo install --path .
 ```
 
-## Shell integration (Bash)
+## Shell Integration
+
+### Bash
 Add to `~/.bashrc`:
 ```bash
 rcd() { builtin cd -- "$(command rcd "$@" | head -n1)"; }
@@ -23,7 +33,7 @@ Reload:
 source ~/.bashrc
 ```
 
-## Shell integration (Zsh)
+### Zsh
 Add to `~/.zshrc`:
 ```zsh
 rcd() { builtin cd -- "$(command rcd "$@" | head -n1)"; }
@@ -33,39 +43,33 @@ Reload:
 source ~/.zshrc
 ```
 
-## Shell integration (macOS Bash)
-Add to `~/.bashrc`:
+## Usage
 ```bash
-rcd() { builtin cd -- "$(command rcd "$@" | head -n1)"; }
+rcd <dir_name> [max_depth]
+# examples:
+rcd leet_code 3
+rcd leet_code   # default depth = 5
 ```
-Ensure login shells load it:
+
+## Performance
+With multithreading enabled via `WalkBuilder`, performance has **significantly increased**.  
+For example, with a default scan depth of 5 and matching at depth 3:  
+
+- **Before:** 107 ms  
+- **After:** 8 ms  
+
+| Before | After |
+|--------|-------|
+| ![Before](assets/perf_before.png) | ![After](assets/perf_after.png) |
+
+## Install
 ```bash
-echo '[ -f ~/.bashrc ] && . ~/.bashrc' >> ~/.bash_profile
-source ~/.bash_profile
+cargo install --path .
 ```
 
-## Shell integration (Fish)
-Create `~/.config/fish/functions/rcd.fish`:
-```fish
-function rcd; set p (command rcd $argv | head -n 1); test -n "$p"; and cd -- $p; end
-```
-Reload:
-```fish
-exec fish
-```
+## Shell Integration
 
-## Shell integration (PowerShell, Windows)
-Add to `$PROFILE`:
-```powershell
-function rcd {
-  $exe = (Get-Command rcd -CommandType Application).Source
-  $p = & $exe @args | Select-Object -First 1
-  if ($p) { Set-Location -LiteralPath $p }
-}
-. $PROFILE
-```
-
-## Shell integration (Git Bash / MSYS2 / Cygwin on Windows)
+### Bash
 Add to `~/.bashrc`:
 ```bash
 rcd() { builtin cd -- "$(command rcd "$@" | head -n1)"; }
@@ -75,10 +79,20 @@ Reload:
 source ~/.bashrc
 ```
 
+### Zsh
+Add to `~/.zshrc`:
+```zsh
+rcd() { builtin cd -- "$(command rcd "$@" | head -n1)"; }
+```
+Reload:
+```zsh
+source ~/.zshrc
+```
+
 ## Usage
 ```bash
 rcd <dir_name> [max_depth]
-# example:
+# examples:
 rcd leet_code 3
-rcd leet_code -> with default depth of 5
+rcd leet_code   # default depth = 5
 ```

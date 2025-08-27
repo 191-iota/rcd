@@ -1,7 +1,10 @@
 use std::env;
+use std::sync::Arc;
+use std::sync::Mutex;
 
 use cliclack::select;
-use walkdir::WalkDir;
+use ignore::WalkBuilder;
+use ignore::WalkState;
 
 fn main() {
     rcd();
@@ -28,19 +31,35 @@ fn rcd() {
         5
     };
 
-    let mut it = WalkDir::new(current_dir).max_depth(max).into_iter();
-    let mut matches: Vec<String> = Vec::new();
+    let matches = Arc::new(Mutex::new(Vec::<String>::new()));
 
-    while let Some(Ok(e)) = it.next() {
-        if e.file_type().is_dir() {
-            let p = e.path();
-            if p.to_string_lossy().contains(search_dir) {
-                matches.push(p.to_string_lossy().into_owned());
-                // do not descend further
-                it.skip_current_dir();
-            }
-        }
-    }
+    WalkBuilder::new(&current_dir)
+        .max_depth(Some(max))
+        .build_parallel()
+        .run(|| {
+            let matches = Arc::clone(&matches);
+            Box::new(move |result| {
+                let e = match result {
+                    Ok(v) => v,
+                    Err(_) => return WalkState::Continue,
+                };
+
+                if e.file_type().map(|t| t.is_dir()).unwrap_or(false) {
+                    let p = e.path();
+                    if p.to_string_lossy().contains(search_dir) {
+                        matches
+                            .lock()
+                            .unwrap()
+                            .push(p.to_string_lossy().into_owned());
+                        // Do not descend further
+                        return WalkState::Skip;
+                    }
+                }
+                WalkState::Continue
+            })
+        });
+
+    let matches: Vec<String> = Arc::try_unwrap(matches).unwrap().into_inner().unwrap();
 
     if matches.len() == 1 {
         println!("{}", matches[0]);
