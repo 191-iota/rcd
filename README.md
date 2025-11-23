@@ -1,5 +1,5 @@
 # rcd
-`rcd` matches one or more paths and `cd`s into the first match or your own selection when multiply matched.
+`rcd` matches one or more paths and `cd`s into the first match or your own selection if multiple were matched.
 
 ## Performance
 With multithreading enabled via `WalkBuilder`, performance has **significantly increased**.  
